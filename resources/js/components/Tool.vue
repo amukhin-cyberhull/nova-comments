@@ -33,11 +33,18 @@
                 </button>
             </div>
 
+            <div class="flex justify-start px-8 pb-4 border-b border-40">
+                <div class="px-2">
+                    <input type="checkbox" v-model="is_public" />
+                </div>
+                <div class="">Public comment</div>
+            </div>
+
             <div class="flex border-b border-40 remove-bottom-border px-8" v-if="hasComments">
                 <div class="w-full py-6">
                     <h3 class="text-90 font-bold text-lg mb-4">Comments</h3>
 
-                    <comment :comment="comment" v-for="(comment, key) in data.resources" :key="key"></comment>
+                    <comment :comment="comment" v-for="(comment, key) in data.resources" :key="key" :canViewPrivateComment="this.can_view_pivate_comment"></comment>
                 </div>
             </div>
 
@@ -72,8 +79,11 @@
 
         data() {
             return {
+                canViewPrivateCommentUri: '/nova-api/permissions?search=comments.view_private',
                 baseCommentUri: '/nova-api/comments',
+                can_view_pivate_comment: false,
                 comment: '',
+                is_public: false,
                 data: {
                     next_page_url: '',
                     prev_page_url: '',
@@ -84,6 +94,7 @@
 
         mounted() {
             this.getComments(this.commentsUri);
+            this.initPermissionCanViewPrivateComment();
         },
 
         computed: {
@@ -120,6 +131,7 @@
 
                 let payload = {
                     comment: this.comment,
+                    is_public: this.is_public,
                     viaResource: this.resourceName,
                     viaResourceId: this.resourceId,
                     viaRelationship: 'comments',
@@ -139,6 +151,26 @@
             getComments(uri) {
                 Nova.request().get(`${uri}${this.queryParams}`)
                     .then(({ data }) => this.data = data);
+            },
+
+            initPermissionCanViewPrivateComment() {
+                const _this = this;
+                Nova.request().get(`${this.canViewPrivateCommentUri}`)
+                    .then(function (data) {
+                        try {
+                            data.data.resources.forEach(function (item, index){
+                                try {
+                                    if (item.title === 'comments.view_private') {
+                                        _this.can_view_pivate_comment = true;
+                                    }
+                                } catch (e) {
+                                    console.error(e);
+                                }
+                            });
+                        } catch (e) {
+                          console.log(e);
+                        }
+                    });
             },
 
             paginationClass(isActive) {

@@ -15,6 +15,12 @@
         </div>
 
         <div class="mt-2" v-html="commentString"></div>
+
+        <template v-if="canViewPrivateComment">
+            <input type="checkbox" class="mt-2" :checked="isPublic" :data-id="getId" @change="changeCommentVisibility" />
+            <div class="inline-block ml-1">Public comment</div>
+        </template>
+
     </div>
 </template>
 
@@ -26,6 +32,10 @@
         props: {
             comment: {
                 type: Object,
+                required: true
+            },
+            canViewPrivateComment: {
+                type: Boolean,
                 required: true
             }
         },
@@ -67,6 +77,35 @@
 
             hasCommenter() {
                 return Boolean(this.commenter);
+            },
+
+            isPublic() {
+                let isPublic = false;
+                this.comment.fields.forEach(function(item, index) {
+                    if(item.attribute === 'is_public') {
+                        isPublic = Boolean(item.value);
+                    }
+                });
+
+                return isPublic;
+            },
+
+            getId() {
+                return this.comment.id.value;
+            }
+        },
+
+        methods: {
+            changeCommentVisibility(event) {
+                try {
+                    const commentId = event.target.attributes['data-id'].nodeValue;
+                    Nova.request().post(`/nova-api/comments/${commentId}`, {
+                        is_public: Boolean(event.target.checked),
+                        _method: 'PUT'
+                    });
+                } catch (error) {
+                    console.error(error);
+                }
             }
         }
     }

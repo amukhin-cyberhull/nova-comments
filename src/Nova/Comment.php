@@ -2,9 +2,12 @@
 
 namespace KirschbaumDevelopment\NovaComments\Nova;
 
+use Laravel\Nova\Fields\Boolean;
 use Laravel\Nova\Resource;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use \Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\MorphTo;
@@ -63,6 +66,8 @@ class Comment extends Resource
             BelongsTo::make('Commenter', 'commenter', config('nova-comments.commenter.nova-resource'))
                 ->exceptOnForms(),
 
+            Boolean::make('Is public', 'is_public'),
+
             DateTime::make('Created', 'created_at')
                 ->exceptOnForms()
                 ->sortable(),
@@ -91,6 +96,33 @@ class Comment extends Resource
     public function filters(NovaRequest $request)
     {
         return [];
+    }
+
+    /**
+     * Build an "index" query for the Comment resource.
+     *
+     * @param NovaRequest  $request
+     * @param EloquentBuilder  $query
+     * @return EloquentBuilder
+     */
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        $user = Auth::getUser();
+        $canViewPrivate = false;
+        if ($user) {
+            $canViewPrivate = $user->can('comments.view_private');
+        }
+
+        if (!$canViewPrivate) {
+            $query->where('is_public', 1);
+            $userId = $user['id'] ?? null;
+
+            if ($userId) {
+                $query->orWhere('commenter_id', (int)$userId);
+            }
+        }
+
+        return $query;
     }
 
     /**
