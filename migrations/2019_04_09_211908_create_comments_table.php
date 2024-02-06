@@ -16,6 +16,7 @@ class CreateCommentsTable extends Migration
             $table->morphs('commentable');
             $table->unsignedInteger('commenter_id')->nullable();
             $table->text('comment');
+            $table->boolean('is_public_comment')->default(false)->index();
             $table->timestamps();
         });
     }

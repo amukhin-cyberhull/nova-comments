@@ -30,7 +30,8 @@
     },
     "autoload": {
         "psr-4": {
-            "KirschbaumDevelopment\\NovaComments\\": "src/"
+            "KirschbaumDevelopment\\NovaComments\\": "src/",
+            "KirschbaumDevelopment\\NovaComments\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "extra": {

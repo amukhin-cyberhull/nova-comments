@@ -11,17 +11,17 @@
         "nova:install": "npm --prefix='../../vendor/laravel/nova' ci"
     },
     "devDependencies": {
-        "@vue/compiler-sfc": "^3.2.22",
+        "@vue/compiler-sfc": "^3.3.8",
         "laravel-mix": "^6.0.41",
         "postcss": "^8.3.11",
         "resolve-url-loader": "^5.0.0",
-        "sass": "^1.51.0",
+        "sass": "^1.69.5",
         "sass-loader": "^12.1.0",
-        "vue-loader": "^16.8.3"
+        "vue-loader": "^16.2.0"
     },
     "dependencies": {
         "lodash": "^4.17.21",
         "moment-timezone": "^0.5.25",
-        "vue": "^2.5.0"
+        "vue": "^3.2.13"
     }
 }
